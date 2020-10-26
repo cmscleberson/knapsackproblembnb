@@ -1,269 +1,224 @@
-/* Variable Description….
-
-n   – Total no. of items available
-
-w[] – Weight of each item
-
-p[] – Profit of each item
-
-m   – Maximum Capacity of the Sack
-
-unit[] – Profit of each item per Unit p[]/w[]
-
-x[] – Final list of items put into the Sack
-
-y[] – Intermediate list of selected items
-
-fp  – Final Profit
-
-fw  – Final Weight
-
-cp  – Current Profit
-
-cw  – Current Weight
-
-*/
 
 
 #include <stdio.h>
 
-#include <conio.h>
 
-#define max 10
+#define MAX 100
 
 
-int w[max],i,j,p[max];
 
-int n,m;
+int i,j,n,qtdeConflitos, capacMoch;
+int listaTempSelec[MAX],listaFimSelec[MAX],valorFinal=-1,pesoFinal,conflitos[MAX];
+float dens[MAX];
 
-float unit[max];
 
-int y[max],x[max],fp=-1,fw;
+typedef struct Item
+{
+    int id;
+    int peso;
+    int valor;
+    float densidade;
+
+} Item;
+
+
+Item itens[MAX];
 
 
 void get()
-
 {
 
-printf("\n Enter total number of items: ");
+    n = 5;
+    capacMoch = 40;
 
-scanf("%d",&n);
+    printf("\n Total number of items: ");
+    printf("%d",n);
 
-printf("\n Enter the Maximum capacity of the Sack: ");
+    printf("\n Maximum capacity of the Sack: ");
+    printf("%d",capacMoch);
 
-scanf("%d",&m);
+    for(i=0; i<MAX; i++)
+    {
+        itens[i].peso = 0;
+        itens[i].valor = 0;
+        itens[i].densidade = 0.00;
+        conflitos[i] = 0;
+        dens[i] = 0.00;
+        listaFimSelec[i] = 0;
+        listaTempSelec[i] = 0;
+    }
 
-for(i=0;i<n;i++)
 
-{
+    itens[0].peso = 10;
+    itens[1].peso = 7;
+    itens[2].peso = 11;
+    itens[3].peso = 15;
+    itens[4].peso = 20;
 
-printf("\n Enter the weight of the item # %d : ",i+1);
 
-scanf("%d",&w[i]);
+    itens[0].valor = 50;
+    itens[1].valor = 56;
+    itens[2].valor = 44;
+    itens[3].valor = 45;
+    itens[4].valor = 40;
 
-printf("\n Enter the profit of the item # %d : ", i+1);
 
-scanf("%d", &p[i]);
+    itens[0].valor = 50;
+    itens[1].valor = 56;
+    itens[2].valor = 44;
+    itens[3].valor = 45;
+    itens[4].valor = 31;
 
-}
 
-}
+    for(i=0;i<n;i++)
+    {
+        printf("\n Profit of the item # %d : ", i+1);
+        printf("%d",itens[i].valor);
+
+        itens[i].id = i;
+        itens[i].densidade = (float) itens[i].valor/ (float)itens[i].peso;
+        dens[i] = itens[i].densidade;
+        printf("\n------ Densidade do item ::: %.2f", itens[i].densidade);
+}}
 
 
 void show()
-
 {
 
-float s=0.0;
+    float s=0.0;
 
-printf("\n\tItem\tWeight\tCost\tUnit Profit\tSelected ");
 
-for(i=0;i<n;i++)
+    printf("\n\tItem\tPeso\tCusto\tSelecionado ");
 
-printf("\n\t%d\t%d\t%d\t%f\t%d",i+1,w[i],p[i],unit[i],x[i]);
+    for(i=0;i<n;i++)
+    {
+        printf("\n\t%d\t%d\t%d\t%d",i+1,itens[i].peso,itens[i].valor,listaFimSelec[i]);
+    }
 
-printf("\n\n The Sack now holds following items : ");
 
-for(i=0;i<n;i++)
+    printf("\n\n The Sack now holds following items : ");
 
-if(x[i]==1)
-
-{
-
-printf("%d\t",i+1);
-
-s += (float) p[i] * (float) x[i];
-
-}
-
-printf("\n Maximum Profit: %f ",s);
-
+    for(i=0;i<n;i++)
+    {
+        if(listaFimSelec[i]==1)
+        {
+            printf("%d\t",i+1);
+            s += (float) itens[i].valor * (float) listaFimSelec[i];
+        }
+    }
+    printf("\n Maximum Profit: %f ",s);
 }
 
 
 /*Arrange the item based on high profit per Unit*/
 
 void sort()
-
 {
 
-int t,t1;
+    for(i=0;i<n;i++)
 
-float t2;
-
-for(i=0;i<n;i++)
-
-unit[i] = (float) p[i] / (float) w[i];
-
-
-for(i=0;i<n-1;i++)
-
-{
-
-for(j=i+1;j<n;j++)
-
-{
-
-if(unit[i]  < unit[j])
-
-{
-
-t2 = unit[i];
-
-unit[i] = unit[j];
-
-unit[j] = t2;
-
-
-t = p[i];
-
-p[i] = p[j];
-
-p[j] = t;
-
-
-t1 = w[i];
-
-w[i] = w[j];
-
-w[j] =t1;
-
+    dens[i] = (float) itens[i].valor / (float) itens[i].peso;
 }
 
+void sort2()
+{
+    int t,t1;
+    float t2;
+    for(i=0;i<n;i++)
+
+    dens[i] = (float) itens[i].valor / (float) itens[i].peso;
+
+
+    for(i=0;i<n-1;i++)
+    {
+        for(j=i+1;j<n;j++)
+        {
+            if(dens[i]  < dens[j])
+            {
+                t2 = dens[i];
+                dens[i] = dens[j];
+                dens[j] = t2;
+
+                t = itens[i].valor;
+                itens[i].valor =itens[j].valor;
+                itens[j].valor = t;
+
+                t1 = itens[i].peso;
+                itens[i].peso = itens[j].peso;
+                itens[j].peso =t1;
+}}}}
+
+
+
+
+
+float bound(float valorAtual,float pesoAtual,int k)
+{
+    float vAtual = valorAtual;
+    float pAtual = pesoAtual;
+
+    for(i=k;i<=n;i++)
+    {
+        pAtual = pAtual+itens[i].peso;
+
+        if( pAtual < capacMoch)
+            vAtual = vAtual +itens[i].valor;
+        else return (vAtual+(1-(pAtual-capacMoch)/ (float)itens[i].peso)*itens[i].valor);
+    }
+
+    return vAtual;
 }
 
-}
 
-}
-
-
-float boundFunction(float cp,float cw,int k)
-
+int verConfl(int idx)
 {
 
-float b = cp;
-
-float c = cw;
-
-for(i=k;i<=n;i++)
-
-{
-
-c = c+w[i];
-
-if( c < m)
-
-b = b +p[i];
-
-else
-
-return (b+(1-(c-m)/ (float)w[i])*p[i]);
-
-}
-
-return b;
 
 }
 
 
-void knapsack01(int k,float cp,float cw)
-
+void knapsack(int k,float valorAtual,float pesoAtual)
 {
+    if(pesoAtual+itens[k].peso <= capacMoch && bound(valorAtual,pesoAtual,k) >= valorFinal)
+    {
+        if(verConfl==1) knapsack(k+1,valorAtual,pesoAtual);
+        listaTempSelec[k] = 1;
+        if(k <= n) knapsack(k+1,valorAtual+itens[k].valor,pesoAtual+itens[k].peso);
+        if(((valorAtual+itens[k].valor) > valorFinal) && ( k == n));
+        {
+            valorFinal = valorAtual+itens[k].valor;
+            pesoFinal = pesoAtual+itens[k].peso;
+            for(j=0;j<=k;j++)
+            {
+               listaFimSelec[j] = listaTempSelec[j];
+    }}}
 
-if(cw+w[k] <= m)
+     listaTempSelec[k] = 0;
+    if( k <= n)
+        knapsack(k+1,valorAtual,pesoAtual);
 
+    if((valorAtual > valorFinal) && (k == n))
+    {
+        valorFinal = valorAtual;
+        pesoFinal = pesoAtual;
+        for(j=0;j<=k;j++)
+        {
+            listaFimSelec[j] = listaTempSelec[j];
+}}}
+
+
+int main()
 {
+    get();
 
-y[k] = 1;
+    printf("\n Mochila Final\n");
 
-if(k <= n)
+    //sort();
 
-knapsack01(k+1,cp+p[k],cw+w[k]);
+    knapsack(0,0.0,0.0);
+    show();
 
-if(((cp+p[k]) > fp) && ( k == n))
-
-{
-
-fp = cp+p[k];
-
-fw = cw+w[k];
-
-for(j=0;j<=k;j++)
-
-x[j] = y[j];
-
-}
-
-}
-
-if(boundFunction(cp,cw,k) >= fp)
-
-{
-
-y[k] = 0;
-
-if( k <= n)
-
-knapsack01(k+1,cp,cw);
-
-if((cp > fp) && (k == n))
-
-{
-
-fp = cp;
-
-fw = cw;
-
-for(j=0;j<=k;j++)
-
-x[j] = y[j];
-
-}
-
-}
-
+    return 1;
 }
 
 
-void main()
-
-{
-
-
-printf("\n\n\n\t\t    ******** KNAPSACK PROBLEM ********");
-
-printf("\n\t\t —————————————–");
-
-get();
-
-printf("\n The Sack is arranged in the order…\n");
-
-sort();
-
-knapsack01(0,0.0,0.0);
-
-show();
-
-getch();
-
-}
